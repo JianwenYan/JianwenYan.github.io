@@ -6,17 +6,17 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <title>色彩收集之一</title>
-  <meta name="description" content="最近比较喜欢的配色。">
+  <title>MPOS BLE 开发记录</title>
+  <meta name="description" content="">
   <meta name="author" content="Wei Wang">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="色彩收集之一">
-  <meta name="twitter:description" content="最近比较喜欢的配色。">
+  <meta name="twitter:title" content="MPOS BLE 开发记录">
+  <meta name="twitter:description" content="">
   
   <meta property="og:type" content="article">
-  <meta property="og:title" content="色彩收集之一">
-  <meta property="og:description" content="最近比较喜欢的配色。">
+  <meta property="og:title" content="MPOS BLE 开发记录">
+  <meta property="og:description" content="">
   
   <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
   <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 
-  <link rel="canonical" href="https://JianwenYan.github.io/2016/05/color-collect-simplify/">
+  <link rel="canonical" href="https://JianwenYan.github.io/2016/06/mpos-ble-develop/">
   <link rel="alternate" type="application/rss+xml" title="颜建文" href="https://JianwenYan.github.io/feed.xml">
   
   <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
@@ -146,23 +146,67 @@
             <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
   <header class="post-header">
     <div class="post-meta">
-      <time datetime="2016-05-25 22:15:24 +0800" itemprop="datePublished" class="post-meta__date date">2016-05-25</time> &#8226; <span class="post-meta__tags tags">Desgin</span>
+      <time datetime="2016-06-24 10:26:24 +0800" itemprop="datePublished" class="post-meta__date date">2016-06-24</time> &#8226; <span class="post-meta__tags tags">Develop</span>
     </div>
-    <h1 class="post-title">色彩收集之一</h1>
+    <h1 class="post-title">MPOS BLE 开发记录</h1>
   </header>
 
   <section class="post">
-    <p>最近比较喜欢的配色。</p>
+    <p><img src="/assets/images/2016/mpos-ble-sdk/mpos-ble-sdk-head.jpg" alt=""></p>
 
-<p><img src="/assets/images/2016/color-collection-simplify/icon-wallet-river-bed.png" alt=""></p>
+<p>整体框架:</p>
 
-<p><img src="/assets/images/2016/color-collection-simplify/icon-wallet-feldspar.png" alt=""></p>
+<p><img src="/assets/images/2016/mpos-ble-sdk/mpos-sdk-frame.jpeg" alt=""></p>
 
-<p><img src="/assets/images/2016/color-collection-simplify/text-tall-poppy-desert-storm.png" alt=""></p>
+<p>蓝牙操作－连接设备:</p>
 
-<p><img src="/assets/images/2016/color-collection-simplify/may-day.png" alt=""></p>
+<p><img src="/assets/images/2016/mpos-ble-sdk/mpos-ble-operation-part1.jpeg" alt=""></p>
 
-<h4>人生就是派对，正面迎接就对。（by 五月天）</h4>
+<p>蓝牙操作－获取特征值进行数据传输：</p>
+
+<p><img src="/assets/images/2016/mpos-ble-sdk/mpos-ble-operation-part2.jpeg" alt=""></p>
+
+<p>Tip 1.蓝牙状态 CBCentralManagerState</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">typedef NS_ENUM(NSInteger, CBCentralManagerState) {
+    CBCentralManagerStateUnknown = 0,
+    CBCentralManagerStateResetting,
+    CBCentralManagerStateUnsupported,
+    CBCentralManagerStateUnauthorized,
+    CBCentralManagerStatePoweredOff,
+    CBCentralManagerStatePoweredOn,
+};
+
+//CBCentralManagerDelegate
+- (void)centralManagerDidUpdateState:(CBCentralManager *)central {
+
+}
+</code></pre></figure>
+<p>CBCentralManagerStateUnauthorized </p>
+
+<p>标识APP没有蓝牙的使用权限，根据这个状态可以在操作前提示用户开启蓝牙权限</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">注：在调用 [[CBCentralManager alloc] initWithDelegate:self queue:managerQueue] 初始化时，
+若app没有蓝牙使用权限系统会给出开启蓝牙使用权限的提示，若用户不允许App使用蓝牙，在之后需
+要进行蓝牙操作的时候，App可以根据这个状态主动提示用户开启App的蓝牙权限。
+</code></pre></figure>
+<p>CBCentralManagerStatePoweredOff </p>
+
+<p>标识手机蓝牙未打开，根据这个状态可以根据需要提示用户开启蓝牙</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">注：在调用 [[CBCentralManager alloc] initWithDelegate:self queue:managerQueue] 初始化时，
+会自动检测蓝牙的打开状态并给出开启蓝牙的提示，若用户未开启蓝牙，在之后需要进行蓝牙操作的
+时候，App可以根据这个状态主动提示用户开启蓝牙。
+
+</code></pre></figure>
+<p>CBCentralManagerStatePoweredOn </p>
+
+<p>标识蓝牙已开启可以进行蓝牙操作，如果我们需要在蓝牙开启后马上进行搜索，就可以在返回这个状态时，添加搜索蓝牙相关代码</p>
+
+<p>Tip2. 自动连接已连接过的蓝牙设备</p>
+
+<p>原理：蓝牙首次连接成功后记录CBPeripheral实例的identifier，再次连接的时候通过调用 CBCentralManager 的 retrievePeripheralsWithIdentifiers 方法检索，获取对应的CBPeripheral实例进行连接（iOS7+）</p>
+
+<p>Tip3. 数据分包发送</p>
+
+<p>按每包不大于20字节进行分包发送，与<a href="http://www.sjsjw.com/kf_other/article/36_18763_5959.asp">BLE协议栈</a>的定义有关。</p>
 
   </section>
 </article>
@@ -170,14 +214,14 @@
 <section class="read-more">
    
    
+   
+   
    <div class="read-more-item">
-       <span class="read-more-item-dim">最近的文章</span>
-       <h2 class="post-list__post-title post-title"><a href="/2016/05/animation-rocket-launch/" title="link to 动画之发射小火箭">动画之发射小火箭</a></h2>
-       <p class="excerpt">使用FB的POP实现的小火箭发射和星空背景移动。图片资源来源于 objc.io。&hellip;</p>
-       <div class="post-list__meta"><time datetime="2016-05-27 18:52:24 +0800" class="post-list__meta--date date">2016-05-27</time> &#8226; <span class="post-list__meta--tags tags">Animation</span><a class="btn-border-small" href=/2016/05/animation-rocket-launch/>继续阅读</a></div>
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2016/06/animation-starbucks-creditcard-interaction/" title="link to Starbucks Credit Card Interaction Demo">Starbucks Credit Card Interaction Demo</a></h2>
+       <p class="excerpt">动画效果:github：https://github.com/JianwenYan/iOSFunningAnimation动画资源（by Kiran）:http://www.materialup.com/posts/starbucks-credit-card-interaction-animationsketch 资源（by Kiran）:https://goo.gl/vNhXjx&hellip;</p>
+       <div class="post-list__meta"><time datetime="2016-06-15 22:26:24 +0800" class="post-list__meta--date date">2016-06-15</time> &#8226; <span class="post-list__meta--tags tags">Animation</span><a class="btn-border-small" href=/2016/06/animation-starbucks-creditcard-interaction/>继续阅读</a></div>
    </div>
-   
-   
    
 </section>
 
@@ -187,8 +231,8 @@
     <script>
     
     var disqus_config = function () {
-        this.page.url = "https://JianwenYan.github.io/2016/05/color-collect-simplify/";
-        this.page.identifier = "/2016/05/color-collect-simplify/";
+        this.page.url = "https://JianwenYan.github.io/2016/06/mpos-ble-develop/";
+        this.page.identifier = "/2016/06/mpos-ble-develop/";
     };
 
     var disqus_shortname = 'jianwenyan';
